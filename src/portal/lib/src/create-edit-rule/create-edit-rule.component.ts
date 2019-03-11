@@ -69,7 +69,7 @@ export class CreateEditRuleComponent implements OnInit, OnDestroy {
     "Saturday",
     "Sunday"
   ];
-  filterSelect: string[] = ["repository", "tag", "label"];
+  filterSelect: string[] = ["type", "repository", "tag", "label"];
   ruleNameTooltip = "REPLICATION.NAME_TOOLTIP";
   headerTitle = "REPLICATION.ADD_POLICY";
 
@@ -86,11 +86,23 @@ export class CreateEditRuleComponent implements OnInit, OnDestroy {
   filterLabelInfo: Label[] = [];  // store filter selected labels` id
   deletedLabelCount = 0;
   deletedLabelInfo: string;
+  registryList: [any] = [{
+     id: 1,
+     name: "registry1",
+     url: "10.160.142.22"
+  }];
+
+  namespaceList: [any] = [{
+    id: 1,
+    name: "namespace1"
+  }];
 
   confirmSub: Subscription;
   ruleForm: FormGroup;
   formArrayLabel: FormArray;
   copyUpdateForm: ReplicationRule;
+  replicationMode: boolean = true;
+  cronString: string;
 
   @Input() projectId: number;
   @Input() projectName: string;
@@ -142,7 +154,7 @@ export class CreateEditRuleComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     if (this.withAdmiral) {
-      this.filterSelect = ["repository", "tag"];
+      this.filterSelect = ["type", "repository", "tag"];
     }
 
     toPromise<Endpoint[]>(this.endpointService.getEndpoints())
@@ -219,6 +231,9 @@ export class CreateEditRuleComponent implements OnInit, OnDestroy {
             this.noSelectedProject = true;
           });
       });
+  }
+
+  registryChange(event): void  {
   }
 
   ngOnDestroy(): void {
@@ -319,7 +334,7 @@ export class CreateEditRuleComponent implements OnInit, OnDestroy {
 
       let delLabel = '';
       filterLabels.forEach((data: any) => {
-        if (data.kind === this.filterSelect[2]) {
+        if (data.kind === this.filterSelect[3]) {
           if (!data.value.deleted) {
             count++;
             this.filterLabelInfo.push(data.value);
@@ -341,7 +356,7 @@ export class CreateEditRuleComponent implements OnInit, OnDestroy {
       if (delLabel || count) {
         let len = filterLabels.length;
         for (let i = 0; i < len; i++) {
-          let lab = filterLabels.find(data => data.kind === this.filterSelect[2]);
+          let lab = filterLabels.find(data => data.kind === this.filterSelect[3]);
           if (lab) { filterLabels.splice(filterLabels.indexOf(lab), 1); }
         }
         filterLabels.push({ kind: 'label', value: count + ' labels' });
@@ -402,7 +417,7 @@ export class CreateEditRuleComponent implements OnInit, OnDestroy {
         }
 
         // if before select, $event is label
-        if (!this.withAdmiral && name === this.filterSelect[2] && data.name === value) {
+        if (!this.withAdmiral && name === this.filterSelect[3] && data.name === value) {
           this.labelInputVal = controlArray.controls[index].get('value').value.split(' ')[0];
           data.isOpen = false;
           controlArray.controls[index].get('value').setValue('');
@@ -425,7 +440,7 @@ export class CreateEditRuleComponent implements OnInit, OnDestroy {
 
   // when input value is label, then open label panel
   openLabelList(labelTag: string, indexId: number, $event: any) {
-    if (!this.withAdmiral && labelTag === this.filterSelect[2]) {
+    if (!this.withAdmiral && labelTag === this.filterSelect[3]) {
       this.filterListData.forEach((data, index) => {
         if (index === indexId) {
           data.isOpen = true;
@@ -517,7 +532,7 @@ export class CreateEditRuleComponent implements OnInit, OnDestroy {
     if (this.filterCount >= this.filterSelect.length) {
       this.isFilterHide = true;
     }
-    if (controlArray.controls[this.filterCount - 1].get('kind').value === this.filterSelect[2] && this.labelInputVal) {
+    if (controlArray.controls[this.filterCount - 1].get('kind').value === this.filterSelect[3] && this.labelInputVal) {
       controlArray.controls[this.filterCount - 1].get('value').setValue(this.labelInputVal + ' labels');
     }
 
